@@ -46,29 +46,18 @@ export async function POST(req: NextRequest): Promise<Response> {
     const { width, height } = page.getSize();
 
     const margin = 36;
-    const colWidths = { media: 100, screen: 90, startDate: 110, endDate: 110, duration: 70 };
+    const colWidths = { media: 120, screen: 100, startDate: 140, endDate: 170 };
     const rowHeight = 20;
 
     let yPosition = height - margin - 30;
 
-    // Draw header
-    page.drawText('Daily Advertisement Log', {
-      x: margin,
-      y: yPosition,
-      size: 16,
-      color: rgb(0, 0, 0),
-    });
-
-    yPosition -= 40;
-
     // Draw column headers
-    const headerColumnNames = ['Media Name', 'Screen Name', 'Start Date', 'End Date', 'Duration (s)'];
+    const headerColumnNames = ['Media Name', 'Screen Name', 'Start Date', 'End Date', 'Duration  (s)'];
     const headerColumns = [
       { width: colWidths.media, name: headerColumnNames[0] },
       { width: colWidths.screen, name: headerColumnNames[1] },
       { width: colWidths.startDate, name: headerColumnNames[2] },
       { width: colWidths.endDate, name: headerColumnNames[3] },
-      { width: colWidths.duration, name: headerColumnNames[4] },
     ];
 
     let xPos = margin;
@@ -113,17 +102,15 @@ export async function POST(req: NextRequest): Promise<Response> {
         mediaName,
         screenName,
         current.toISOString().slice(0, 19).replace('T', ' '),
-        adEnd.toISOString().slice(0, 19).replace('T', ' '),
-        durationNum.toString(),
+        `${adEnd.toISOString().slice(0, 19).replace('T', ' ')} ${durationNum}`,
       ];
 
       xPos = margin;
       const cols = [
-        { width: colWidths.media, value: rowData[0] },
-        { width: colWidths.screen, value: rowData[1] },
-        { width: colWidths.startDate, value: rowData[2] },
-        { width: colWidths.endDate, value: rowData[3] },
-        { width: colWidths.duration, value: rowData[4] },
+        { width: colWidths.media, value: rowData[0], color: rgb(0, 0, 0) },
+        { width: colWidths.screen, value: rowData[1], color: rgb(0, 0, 0) },
+        { width: colWidths.startDate, value: rowData[2], color: rgb(0, 0, 1) },
+        { width: colWidths.endDate, value: rowData[3], color: rgb(0, 0, 0) },
       ];
 
       for (const col of cols) {
@@ -139,7 +126,7 @@ export async function POST(req: NextRequest): Promise<Response> {
           x: xPos + 5,
           y: yPosition - rowHeight + 6,
           size: 8,
-          color: rgb(0, 0, 0),
+          color: col.color,
         });
         xPos += col.width;
       }
