@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import PDFDocument from 'pdfkit';
 
-export const config = {
-  runtime: 'nodejs',
-};
+export const runtime = 'nodejs';
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<Response> {
   try {
     const body = await req.json();
     const {
@@ -115,10 +113,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Convert PDF to buffer
-    const chunks: Buffer[] = [];
-    pdf.on('data', (chunk: Buffer) => chunks.push(chunk));
-
     return new Promise((resolve) => {
+      const chunks: Buffer[] = [];
+      
+      pdf.on('data', (chunk: Buffer) => {
+        chunks.push(chunk);
+      });
+
       pdf.on('end', () => {
         const buffer = Buffer.concat(chunks);
         const response = new NextResponse(buffer);
@@ -126,8 +127,9 @@ export async function POST(req: NextRequest) {
         response.headers.set('Content-Disposition', 'attachment; filename="daily_log.pdf"');
         resolve(response);
       });
+
       pdf.end();
-    });
+    }) as Promise<Response>;
   } catch (error) {
     console.error('PDF generation error:', error);
     return NextResponse.json(
