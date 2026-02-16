@@ -62,18 +62,10 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     let xPos = margin;
     for (const col of headerColumns) {
-      page.drawRectangle({
-        x: xPos,
-        y: yPosition - rowHeight,
-        width: col.width,
-        height: rowHeight,
-        borderColor: rgb(0, 0, 0),
-        borderWidth: 1,
-      });
       page.drawText(col.name, {
         x: xPos + 5,
         y: yPosition - rowHeight + 6,
-        size: 9,
+        size: 10,
         color: rgb(0, 0, 0),
       });
       xPos += col.width;
@@ -114,14 +106,6 @@ export async function POST(req: NextRequest): Promise<Response> {
       ];
 
       for (const col of cols) {
-        page.drawRectangle({
-          x: xPos,
-          y: yPosition - rowHeight,
-          width: col.width,
-          height: rowHeight,
-          borderColor: rgb(0, 0, 0),
-          borderWidth: 1,
-        });
         page.drawText(col.value, {
           x: xPos + 5,
           y: yPosition - rowHeight + 6,

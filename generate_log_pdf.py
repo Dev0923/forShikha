@@ -41,8 +41,6 @@ def build_pdf(output_path, rows):
     table = Table(data, repeatRows=1, colWidths=[120, 100, 140, 170])
     table.setStyle(TableStyle([
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
-        ("BOX", (0, 0), (-1, 0), 1, colors.black),
-        ("INNERGRID", (0, 0), (-1, 0), 1, colors.black),
         ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
         ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
         ("FONTSIZE", (0, 0), (-1, -1), 9),
