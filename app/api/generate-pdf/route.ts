@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import PDFDocument from 'pdfkit';
+import { PDFDocument, rgb, PDFPage } from 'pdf-lib';
 
 export const runtime = 'nodejs';
 
@@ -40,41 +40,59 @@ export async function POST(req: NextRequest): Promise<Response> {
       );
     }
 
-    // Generate PDF
-    const pdf = new PDFDocument({
-      margin: 36,
-      size: 'A4',
+    // Create PDF
+    const pdfDoc = await PDFDocument.create();
+    let page = pdfDoc.addPage([595, 842]); // A4 size
+    const { width, height } = page.getSize();
+
+    const margin = 36;
+    const colWidths = { media: 100, screen: 90, startDate: 110, endDate: 110, duration: 70 };
+    const rowHeight = 20;
+
+    let yPosition = height - margin - 30;
+
+    // Draw header
+    page.drawText('Daily Advertisement Log', {
+      x: margin,
+      y: yPosition,
+      size: 16,
+      color: rgb(0, 0, 0),
     });
 
-    // Header
-    pdf.fontSize(20).font('Helvetica-Bold').text('Daily Advertisement Log', { align: 'center' });
-    pdf.moveDown(1);
+    yPosition -= 40;
 
-    // Table header
-    const tableTop = pdf.y;
-    const colWidths = { media: 100, screen: 90, startDate: 110, endDate: 110, duration: 70 };
-    const rowHeight = 25;
+    // Draw column headers
+    const headerColumnNames = ['Media Name', 'Screen Name', 'Start Date', 'End Date', 'Duration (s)'];
+    const headerColumns = [
+      { width: colWidths.media, name: headerColumnNames[0] },
+      { width: colWidths.screen, name: headerColumnNames[1] },
+      { width: colWidths.startDate, name: headerColumnNames[2] },
+      { width: colWidths.endDate, name: headerColumnNames[3] },
+      { width: colWidths.duration, name: headerColumnNames[4] },
+    ];
 
-    // Draw header row background
-    pdf.rect(36, tableTop, 36 + colWidths.media + colWidths.screen + colWidths.startDate + colWidths.endDate + colWidths.duration, rowHeight).fillAndStroke('lightgray', 'black');
+    let xPos = margin;
+    for (const col of headerColumns) {
+      page.drawRectangle({
+        x: xPos,
+        y: yPosition - rowHeight,
+        width: col.width,
+        height: rowHeight,
+        borderColor: rgb(0, 0, 0),
+        borderWidth: 1,
+      });
+      page.drawText(col.name, {
+        x: xPos + 5,
+        y: yPosition - rowHeight + 6,
+        size: 9,
+        color: rgb(0, 0, 0),
+      });
+      xPos += col.width;
+    }
 
-    // Header text
-    pdf.fontSize(10).font('Helvetica-Bold').fillColor('black');
-    let xPos = 40;
-    pdf.text('Media Name', xPos, tableTop + 5, { width: colWidths.media, align: 'left' });
-    xPos += colWidths.media;
-    pdf.text('Screen Name', xPos, tableTop + 5, { width: colWidths.screen, align: 'left' });
-    xPos += colWidths.screen;
-    pdf.text('Start Date', xPos, tableTop + 5, { width: colWidths.startDate, align: 'left' });
-    xPos += colWidths.startDate;
-    pdf.text('End Date', xPos, tableTop + 5, { width: colWidths.endDate, align: 'left' });
-    xPos += colWidths.endDate;
-    pdf.text('Duration (s)', xPos, tableTop + 5, { width: colWidths.duration, align: 'left' });
-
-    pdf.moveDown(2.5);
+    yPosition -= rowHeight + 5;
 
     // Generate rows
-    pdf.fontSize(9).font('Helvetica').fillColor('black');
     const durationNum = parseInt(duration);
     const gapNum = parseInt(gap || '0');
     let current = new Date(start);
@@ -84,52 +102,61 @@ export async function POST(req: NextRequest): Promise<Response> {
 
       if (adEnd > end) break;
 
-      const currentY = pdf.y;
+      // Check if we need a new page
+      if (yPosition < margin + rowHeight + 20) {
+        page = pdfDoc.addPage([595, 842]);
+        yPosition = height - margin - 30;
+      }
 
-      // Draw row grid
-      pdf.rect(36, currentY, 36 + colWidths.media + colWidths.screen + colWidths.startDate + colWidths.endDate + colWidths.duration, rowHeight).stroke('black');
+      // Draw row cells
+      const rowData = [
+        mediaName,
+        screenName,
+        current.toISOString().slice(0, 19).replace('T', ' '),
+        adEnd.toISOString().slice(0, 19).replace('T', ' '),
+        durationNum.toString(),
+      ];
 
-      xPos = 40;
-      pdf.text(mediaName, xPos, currentY + 5, { width: colWidths.media, align: 'left' });
-      xPos += colWidths.media;
-      pdf.text(screenName, xPos, currentY + 5, { width: colWidths.screen, align: 'left' });
-      xPos += colWidths.screen;
-      pdf.text(current.toISOString().slice(0, 19).replace('T', ' '), xPos, currentY + 5, {
-        width: colWidths.startDate,
-        align: 'left',
-      });
-      xPos += colWidths.startDate;
-      pdf.text(adEnd.toISOString().slice(0, 19).replace('T', ' '), xPos, currentY + 5, {
-        width: colWidths.endDate,
-        align: 'left',
-      });
-      xPos += colWidths.endDate;
-      pdf.text(durationNum.toString(), xPos, currentY + 5, { width: colWidths.duration, align: 'left' });
+      xPos = margin;
+      const cols = [
+        { width: colWidths.media, value: rowData[0] },
+        { width: colWidths.screen, value: rowData[1] },
+        { width: colWidths.startDate, value: rowData[2] },
+        { width: colWidths.endDate, value: rowData[3] },
+        { width: colWidths.duration, value: rowData[4] },
+      ];
 
-      pdf.moveDown(2.5);
+      for (const col of cols) {
+        page.drawRectangle({
+          x: xPos,
+          y: yPosition - rowHeight,
+          width: col.width,
+          height: rowHeight,
+          borderColor: rgb(0, 0, 0),
+          borderWidth: 1,
+        });
+        page.drawText(col.value, {
+          x: xPos + 5,
+          y: yPosition - rowHeight + 6,
+          size: 8,
+          color: rgb(0, 0, 0),
+        });
+        xPos += col.width;
+      }
+
+      yPosition -= rowHeight;
 
       // Move to next slot
       current = new Date(current.getTime() + (durationNum + gapNum) * 1000);
     }
 
-    // Convert PDF to buffer
-    return new Promise((resolve) => {
-      const chunks: Buffer[] = [];
-      
-      pdf.on('data', (chunk: Buffer) => {
-        chunks.push(chunk);
-      });
-
-      pdf.on('end', () => {
-        const buffer = Buffer.concat(chunks);
-        const response = new NextResponse(buffer);
-        response.headers.set('Content-Type', 'application/pdf');
-        response.headers.set('Content-Disposition', 'attachment; filename="daily_log.pdf"');
-        resolve(response);
-      });
-
-      pdf.end();
-    }) as Promise<Response>;
+    // Save and return PDF
+    const pdfBytes = await pdfDoc.save();
+    const pdfBuffer = Buffer.from(pdfBytes);
+    const response = new NextResponse(pdfBuffer);
+    response.headers.set('Content-Type', 'application/pdf');
+    response.headers.set('Content-Disposition', 'attachment; filename="daily_log.pdf"');
+    return response;
   } catch (error) {
     console.error('PDF generation error:', error);
     return NextResponse.json(
