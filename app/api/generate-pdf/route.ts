@@ -71,6 +71,14 @@ export async function POST(req: NextRequest): Promise<Response> {
       xPos += col.width;
     }
 
+    // Draw line below header
+    page.drawLine({
+      start: { x: margin, y: yPosition - rowHeight },
+      end: { x: margin + colWidths.media + colWidths.screen + colWidths.startDate + colWidths.endDate, y: yPosition - rowHeight },
+      thickness: 1,
+      color: rgb(0, 0, 0),
+    });
+
     yPosition -= rowHeight + 5;
 
     // Generate rows
