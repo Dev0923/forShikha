@@ -1,0 +1,10 @@
+{
+  "media_name": "Wonder_cement_RS",
+  "screen_name": "Ridhi_Sidhi",
+  "campaign_start": "2026-01-29 11:04:40",
+  "campaign_end": "2026-01-29 22:54:40",
+  "duration_seconds": 10,
+  "gap_seconds": 200,
+  "title": "Daily Advertisement Log",
+  "output_pdf": "daily_log.pdf"
+}
