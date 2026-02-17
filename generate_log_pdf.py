@@ -46,7 +46,7 @@ def build_pdf(output_path, rows):
         ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
         ("FONTSIZE", (0, 0), (-1, -1), 9),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TEXTCOLOR", (2, 1), (2, -1), colors.blue),
+        ("TEXTCOLOR", (2, 1), (2, -1), colors.black),
     ]))
 
     doc.build([table])
