@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PDFDocument, rgb, PDFPage } from 'pdf-lib';
+import { PDFDocument, rgb, PDFPage, StandardFonts } from 'pdf-lib';
 
 export const runtime = 'nodejs';
 
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     // Create PDF
     const pdfDoc = await PDFDocument.create();
+    const headerFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     let page = pdfDoc.addPage([595, 842]); // A4 size
     const { width, height } = page.getSize();
 
@@ -76,6 +77,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         y: yPosition - rowHeight + 6,
         size: 9,
         color: rgb(0, 0, 0),
+        font: headerFont,
       });
       xPos += col.width;
     }
@@ -125,14 +127,6 @@ export async function POST(req: NextRequest): Promise<Response> {
       ];
 
       for (const col of cols) {
-        page.drawRectangle({
-          x: xPos,
-          y: yPosition - rowHeight,
-          width: col.width,
-          height: rowHeight,
-          borderColor: rgb(0, 0, 0),
-          borderWidth: 1,
-        });
         page.drawText(col.value, {
           x: xPos + 5,
           y: yPosition - rowHeight + 6,
