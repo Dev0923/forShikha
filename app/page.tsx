@@ -15,6 +15,7 @@ export default function Home() {
     gap: '200',
   });
 
+  const [screenSelection, setScreenSelection] = useState(screenOptions[0]);
   const [customScreen, setCustomScreen] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -29,6 +30,7 @@ export default function Home() {
 
   const handleScreenChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
+    setScreenSelection(value);
     if (value === 'custom') {
       setFormData((prev) => ({
         ...prev,
@@ -119,7 +121,7 @@ export default function Home() {
             <select
               id="screenName"
               name="screenName"
-              value={customScreen ? 'custom' : formData.screenName}
+              value={screenSelection}
               onChange={handleScreenChange}
               required
               style={{
@@ -138,7 +140,7 @@ export default function Home() {
               ))}
               <option value="custom">Custom Addition</option>
             </select>
-            {customScreen || formData.screenName === 'custom' ? (
+            {screenSelection === 'custom' ? (
               <input
                 type="text"
                 id="customScreen"
