@@ -4,6 +4,8 @@ import { useState } from 'react';
 import styles from './page.module.css';
 
 export default function Home() {
+  const screenOptions = ['Ridhi_Sidhi', 'VivaCity_Mall', 'NewGate_MiRoad', 'Gt_Central_Mall'];
+  
   const [formData, setFormData] = useState({
     mediaName: 'Wonder_cement_RS',
     screenName: 'Ridhi_Sidhi',
@@ -13,6 +15,7 @@ export default function Home() {
     gap: '200',
   });
 
+  const [customScreen, setCustomScreen] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,6 +24,31 @@ export default function Home() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleScreenChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === 'custom') {
+      setFormData((prev) => ({
+        ...prev,
+        screenName: customScreen,
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        screenName: value,
+      }));
+      setCustomScreen('');
+    }
+  };
+
+  const handleCustomScreenChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setCustomScreen(value);
+    setFormData((prev) => ({
+      ...prev,
+      screenName: value,
     }));
   };
 
@@ -88,14 +116,46 @@ export default function Home() {
 
           <div className={styles.formGroup}>
             <label htmlFor="screenName">Screen Name</label>
-            <input
-              type="text"
+            <select
               id="screenName"
               name="screenName"
-              value={formData.screenName}
-              onChange={handleInputChange}
+              value={customScreen ? 'custom' : formData.screenName}
+              onChange={handleScreenChange}
               required
-            />
+              style={{
+                width: '100%',
+                padding: '8px 12px',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                fontSize: '16px',
+                fontFamily: 'inherit',
+              }}
+            >
+              {screenOptions.map((screen) => (
+                <option key={screen} value={screen}>
+                  {screen}
+                </option>
+              ))}
+              <option value="custom">Custom Addition</option>
+            </select>
+            {customScreen || formData.screenName === 'custom' ? (
+              <input
+                type="text"
+                id="customScreen"
+                placeholder="Enter custom screen name"
+                value={customScreen}
+                onChange={handleCustomScreenChange}
+                required
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '1px solid #ccc',
+                  borderRadius: '4px',
+                  fontSize: '16px',
+                  marginTop: '8px',
+                }}
+              />
+            ) : null}
           </div>
 
           <div className={styles.formRow}>

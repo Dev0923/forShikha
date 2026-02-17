@@ -46,7 +46,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     const { width, height } = page.getSize();
 
     const margin = 36;
-    const colWidths = { media: 120, screen: 100, startDate: 140, endDate: 170 };
+    const colWidths = { media: 120, screen: 100, startDate: 140, endDate: 170, duration: 70 };
     const rowHeight = 20;
 
     let yPosition = height - margin - 30;
@@ -58,23 +58,32 @@ export async function POST(req: NextRequest): Promise<Response> {
       { width: colWidths.screen, name: headerColumnNames[1] },
       { width: colWidths.startDate, name: headerColumnNames[2] },
       { width: colWidths.endDate, name: headerColumnNames[3] },
+      { width: colWidths.duration, name: headerColumnNames[4] },
     ];
 
     let xPos = margin;
     for (const col of headerColumns) {
+      page.drawRectangle({
+        x: xPos,
+        y: yPosition - rowHeight,
+        width: col.width,
+        height: rowHeight,
+        borderColor: rgb(0, 0, 0),
+        borderWidth: 1,
+      });
       page.drawText(col.name, {
         x: xPos + 5,
         y: yPosition - rowHeight + 6,
-        size: 10,
+        size: 9,
         color: rgb(0, 0, 0),
       });
       xPos += col.width;
     }
 
-    // Draw line below header
+    // Draw bottom border for header
     page.drawLine({
       start: { x: margin, y: yPosition - rowHeight },
-      end: { x: margin + colWidths.media + colWidths.screen + colWidths.startDate + colWidths.endDate, y: yPosition - rowHeight },
+      end: { x: margin + colWidths.media + colWidths.screen + colWidths.startDate + colWidths.endDate + colWidths.duration, y: yPosition - rowHeight },
       thickness: 1,
       color: rgb(0, 0, 0),
     });
@@ -102,18 +111,28 @@ export async function POST(req: NextRequest): Promise<Response> {
         mediaName,
         screenName,
         current.toISOString().slice(0, 19).replace('T', ' '),
-        `${adEnd.toISOString().slice(0, 19).replace('T', ' ')} ${durationNum}`,
+        adEnd.toISOString().slice(0, 19).replace('T', ' '),
+        durationNum.toString(),
       ];
 
       xPos = margin;
       const cols = [
         { width: colWidths.media, value: rowData[0], color: rgb(0, 0, 0) },
         { width: colWidths.screen, value: rowData[1], color: rgb(0, 0, 0) },
-        { width: colWidths.startDate, value: rowData[2], color: rgb(0, 0, 1) },
+        { width: colWidths.startDate, value: rowData[2], color: rgb(0, 0, 0) },
         { width: colWidths.endDate, value: rowData[3], color: rgb(0, 0, 0) },
+        { width: colWidths.duration, value: rowData[4], color: rgb(0, 0, 0) },
       ];
 
       for (const col of cols) {
+        page.drawRectangle({
+          x: xPos,
+          y: yPosition - rowHeight,
+          width: col.width,
+          height: rowHeight,
+          borderColor: rgb(0, 0, 0),
+          borderWidth: 1,
+        });
         page.drawText(col.value, {
           x: xPos + 5,
           y: yPosition - rowHeight + 6,
