@@ -64,7 +64,7 @@ def build_pdf(output_path):
     # End Date: ~130
     # Duration: ~50
     # Total: 550
-    table = Table(all_data, repeatRows=1, colWidths=[140, 90, 130, 130, 60])
+    table = Table(all_data, repeatRows=1, colWidths=[125, 85, 130, 130, 50])
 
     # Add style to match image
     table.setStyle(TableStyle([
