@@ -1,7 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PDFDocument, rgb, PDFPage, StandardFonts } from 'pdf-lib';
+import { PDFDocument, PDFFont, rgb, StandardFonts } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
 export const runtime = 'nodejs';
+
+async function resolvePdfFont(pdfDoc: PDFDocument): Promise<PDFFont> {
+  const aptosCandidates = [
+    path.join(process.cwd(), 'public', 'fonts', 'AptosNarrow.ttf'),
+    path.join(process.cwd(), 'public', 'fonts', 'aptosnarrow.ttf'),
+    path.join(process.cwd(), 'AptosNarrow.ttf'),
+    path.join(process.cwd(), 'aptosnarrow.ttf'),
+  ];
+
+  pdfDoc.registerFontkit(fontkit);
+
+  for (const fontPath of aptosCandidates) {
+    try {
+      const fontBytes = await readFile(fontPath);
+      return await pdfDoc.embedFont(fontBytes);
+    } catch {
+      // Try next candidate path
+    }
+  }
+
+  return await pdfDoc.embedFont(StandardFonts.Helvetica);
+}
 
 export async function POST(req: NextRequest): Promise<Response> {
   try {
@@ -42,7 +67,7 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     // Create PDF
     const pdfDoc = await PDFDocument.create();
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const font = await resolvePdfFont(pdfDoc);
     let page = pdfDoc.addPage([595, 842]); // A4 size
     const { width, height } = page.getSize();
 
@@ -110,6 +135,21 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     while (current <= end) {
       const adEnd = new Date(current.getTime() + durationNum * 1000);
+
+      if (adEnd > end) break;
+
+      if (yPosition < leftMargin + rowHeight + 20) {
+        page = pdfDoc.addPage([595, 842]);
+        yPosition = height - leftMargin - 30;
+      }
+
+      const rowData = [
+        mediaName,
+        screenName,
+        current.toISOString().slice(0, 19).replace('T', ' '),
+        adEnd.toISOString().slice(0, 19).replace('T', ' '),
+        durationNum.toString(),
+      ];
 
       // Draw each cell at its fixed position
       page.drawText(rowData[0], {
