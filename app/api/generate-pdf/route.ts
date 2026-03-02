@@ -111,6 +111,21 @@ export async function POST(req: NextRequest): Promise<Response> {
     while (current <= end) {
       const adEnd = new Date(current.getTime() + durationNum * 1000);
 
+      if (adEnd > end) break;
+
+      if (yPosition < leftMargin + rowHeight + 20) {
+        page = pdfDoc.addPage([595, 842]);
+        yPosition = height - leftMargin - 30;
+      }
+
+      const rowData = [
+        mediaName,
+        screenName,
+        current.toISOString().slice(0, 19).replace('T', ' '),
+        adEnd.toISOString().slice(0, 19).replace('T', ' '),
+        durationNum.toString(),
+      ];
+
       // Draw each cell at its fixed position
       page.drawText(rowData[0], {
         x: colPositions.media,
