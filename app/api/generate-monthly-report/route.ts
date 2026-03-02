@@ -4,7 +4,10 @@ import fontkit from '@pdf-lib/fontkit';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import archiver from 'archiver';
+<<<<<<< HEAD
 import { Readable } from 'stream';
+=======
+>>>>>>> da34a36be05d5c832356d36ea8cb484fdf88981b
 
 export const runtime = 'nodejs';
 
