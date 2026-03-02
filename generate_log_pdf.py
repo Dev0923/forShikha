@@ -44,12 +44,12 @@ def build_pdf(output_path, rows):
     except:
         font_name = 'Helvetica'
     
-    doc = SimpleDocTemplate(str(output_path), pagesize=A4, topMargin=50, leftMargin=75, rightMargin=100)
+    doc = SimpleDocTemplate(str(output_path), pagesize=A4, topMargin=50, leftMargin=50, rightMargin=45)
 
     data = [["Media Name", "Screen Name", "Start Date", "End Date", "Duration  (s)"]] + rows
 
-    # Column widths with gaps: Media(135) + gap(38) + Screen(85) + gap(38) + Start(110) + gap(38) + End(110) + gap(38) + Duration(40)
-    table = Table(data, repeatRows=1, colWidths=[135, 85, 110, 110, 40], rowHeights=19, spaceBefore=10)
+    # Column widths adjusted to fit page: 130 + 90 + 120 + 120 + 40 = 500
+    table = Table(data, repeatRows=1, colWidths=[130, 90, 120, 120, 40], rowHeights=19, spaceBefore=10)
     
     table.setStyle(TableStyle([
         # Font styling - Regular (not bold) for all including header
@@ -65,7 +65,7 @@ def build_pdf(output_path, rows):
         
         # Cell padding - minimal for borderless look
         ('LEFTPADDING', (0, 0), (-1, -1), 0),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 38),  # Gap between columns
+        ('RIGHTPADDING', (0, 0), (-1, -1), 0),
         ('TOPPADDING', (0, 0), (-1, -1), 2),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
         

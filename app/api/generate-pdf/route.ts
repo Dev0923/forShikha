@@ -46,37 +46,60 @@ export async function POST(req: NextRequest): Promise<Response> {
     let page = pdfDoc.addPage([595, 842]); // A4 size
     const { width, height } = page.getSize();
 
-    const leftMargin = 75;
-    const rightMargin = 100;
-    const colWidths = { media: 135, screen: 85, startDate: 110, endDate: 110, duration: 40 };
-    const colGap = 38; // Gap between columns
+    const leftMargin = 50;
+    const rightMargin = 45;
+    // Adjusted column widths to fit in page (595 - 50 - 45 = 500 available)
+    // Media + Screen + Start + End + Duration = 500
+    const colPositions = {
+      media: leftMargin,              // 50
+      screen: leftMargin + 130,       // 180 (130 = media width)
+      startDate: leftMargin + 220,    // 270 (90 = screen width)
+      endDate: leftMargin + 340,      // 390 (120 = start width)
+      duration: leftMargin + 460,     // 510 (120 = end width, 40 = duration width)
+    };
     const rowHeight = 19;
-    const lineHeight = 1.4;
 
     let yPosition = height - leftMargin - 30;
 
     // Draw column headers (regular font, no bold, no background)
     const headerColumnNames = ['Media Name', 'Screen Name', 'Start Date', 'End Date', 'Duration  (s)'];
-    const headerColumns = [
-      { width: colWidths.media, name: headerColumnNames[0] },
-      { width: colWidths.screen, name: headerColumnNames[1] },
-      { width: colWidths.startDate, name: headerColumnNames[2] },
-      { width: colWidths.endDate, name: headerColumnNames[3] },
-      { width: colWidths.duration, name: headerColumnNames[4] },
-    ];
-
-    let xPos = leftMargin;
-    for (const col of headerColumns) {
-      // Draw header text (left-aligned, no background, no borders)
-      page.drawText(col.name, {
-        x: xPos,
-        y: yPosition,
-        size: 10,
-        color: rgb(0, 0, 0),
-        font: font,
-      });
-      xPos += col.width + colGap;
-    }
+    
+    // Draw each header at its fixed position
+    page.drawText(headerColumnNames[0], {
+      x: colPositions.media,
+      y: yPosition,
+      size: 10,
+      color: rgb(0, 0, 0),
+      font: font,
+    });
+    page.drawText(headerColumnNames[1], {
+      x: colPositions.screen,
+      y: yPosition,
+      size: 10,
+      color: rgb(0, 0, 0),
+      font: font,
+    });
+    page.drawText(headerColumnNames[2], {
+      x: colPositions.startDate,
+      y: yPosition,
+      size: 10,
+      color: rgb(0, 0, 0),
+      font: font,
+    });
+    page.drawText(headerColumnNames[3], {
+      x: colPositions.endDate,
+      y: yPosition,
+      size: 10,
+      color: rgb(0, 0, 0),
+      font: font,
+    });
+    page.drawText(headerColumnNames[4], {
+      x: colPositions.duration,
+      y: yPosition,
+      size: 10,
+      color: rgb(0, 0, 0),
+      font: font,
+    });
 
     yPosition -= rowHeight + 5;
 
@@ -88,26 +111,42 @@ export async function POST(req: NextRequest): Promise<Response> {
     while (current <= end) {
       const adEnd = new Date(current.getTime() + durationNum * 1000);
 
-      if (adEnd > end) break;
-
-      // Check if we need a new page
-      if (yPosition < leftMargin + rowHeight + 20) {
-        page = pdfDoc.addPage([595, 842]);
-        yPosition = height - leftMargin - 30;
-      }
-
-      // Draw row cells (borderless, left-aligned)
-      const rowData = [
-        mediaName,
-        screenName,
-        current.toISOString().slice(0, 19).replace('T', ' '),
-        adEnd.toISOString().slice(0, 19).replace('T', ' '),
-        durationNum.toString(),
-      ];
-
-      xPos = leftMargin;
-      const cols = [
-        { width: colWidths.media, value: rowData[0] },
+      // Draw each cell at its fixed position
+      page.drawText(rowData[0], {
+        x: colPositions.media,
+        y: yPosition,
+        size: 10,
+        color: rgb(0, 0, 0),
+        font: font,
+      });
+      page.drawText(rowData[1], {
+        x: colPositions.screen,
+        y: yPosition,
+        size: 10,
+        color: rgb(0, 0, 0),
+        font: font,
+      });
+      page.drawText(rowData[2], {
+        x: colPositions.startDate,
+        y: yPosition,
+        size: 10,
+        color: rgb(0, 0, 0),
+        font: font,
+      });
+      page.drawText(rowData[3], {
+        x: colPositions.endDate,
+        y: yPosition,
+        size: 10,
+        color: rgb(0, 0, 0),
+        font: font,
+      });
+      page.drawText(rowData[4], {
+        x: colPositions.duration,
+        y: yPosition,
+        size: 10,
+        color: rgb(0, 0, 0),
+        font: font,
+      }); { width: colWidths.media, value: rowData[0] },
         { width: colWidths.screen, value: rowData[1] },
         { width: colWidths.startDate, value: rowData[2] },
         { width: colWidths.endDate, value: rowData[3] },
