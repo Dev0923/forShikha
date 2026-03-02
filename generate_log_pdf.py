@@ -26,7 +26,8 @@ def generate_rows(media_name, screen_name, start_dt, end_dt, duration_sec, gap_s
             media_name,
             screen_name,
             current.strftime("%Y-%m-%d %H:%M:%S"),
-            f"{ad_end.strftime('%Y-%m-%d %H:%M:%S')} {duration_sec}",
+            ad_end.strftime("%Y-%m-%d %H:%M:%S"),
+            str(duration_sec),
         ])
         current = current + duration + gap
 
@@ -38,7 +39,7 @@ def build_pdf(output_path, rows):
 
     data = [["Media Name", "Screen Name", "Start Date", "End Date", "Duration  (s)"]] + rows
 
-    table = Table(data, repeatRows=1, colWidths=[120, 100, 140, 170])
+    table = Table(data, repeatRows=1, colWidths=[135, 95, 145, 145, 60])
     table.setStyle(TableStyle([
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
         ("BOX", (0, 0), (-1, 0), 1, colors.black),

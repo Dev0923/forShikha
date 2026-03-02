@@ -47,7 +47,7 @@ export async function POST(req: NextRequest): Promise<Response> {
     const { width, height } = page.getSize();
 
     const margin = 36;
-    const colWidths = { media: 120, screen: 100, startDate: 140, endDate: 170, duration: 70 };
+    const colWidths = { media: 135, screen: 95, startDate: 145, endDate: 145, duration: 60 };
     const rowHeight = 20;
 
     let yPosition = height - margin - 30;
