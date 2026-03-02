@@ -110,8 +110,7 @@ export async function POST(req: NextRequest): Promise<Response> {
       if (adEnd > end) break;
 
       // Check if we need a new page
-      if (yPosition < margin + rowHeight + 20) {
-        page = pdfDoc.leftMargin + rowHeight + 20) {
+      if (yPosition < leftMargin + rowHeight + 20) {
         page = pdfDoc.addPage([595, 842]);
         yPosition = height - leftMargin - 30;
       }
