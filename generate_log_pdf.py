@@ -4,7 +4,6 @@ from pathlib import Path
 
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -37,12 +36,25 @@ def generate_rows(media_name, screen_name, start_dt, end_dt, duration_sec, gap_s
 
 
 def build_pdf(output_path, rows):
-    # Try to register Calibri font, fall back to Helvetica if not available
-    try:
-        pdfmetrics.registerFont(TTFont('Calibri', 'calibri.ttf'))
-        font_name = 'Calibri'
-    except:
-        font_name = 'Helvetica'
+    # Try Aptos Narrow first, then Calibri, then Helvetica fallback
+    font_name = 'Helvetica'
+    font_candidates = [
+        ('AptosNarrow', ['AptosNarrow.ttf', 'aptosnarrow.ttf', 'Aptos Narrow.ttf']),
+        ('Calibri', ['calibri.ttf', 'Calibri.ttf']),
+    ]
+
+    for font_alias, file_names in font_candidates:
+        is_registered = False
+        for file_name in file_names:
+            try:
+                pdfmetrics.registerFont(TTFont(font_alias, file_name))
+                font_name = font_alias
+                is_registered = True
+                break
+            except Exception:
+                continue
+        if is_registered:
+            break
     
     doc = SimpleDocTemplate(str(output_path), pagesize=A4, topMargin=50, leftMargin=50, rightMargin=45)
 
