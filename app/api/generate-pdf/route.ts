@@ -146,24 +146,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         size: 10,
         color: rgb(0, 0, 0),
         font: font,
-      }); { width: colWidths.media, value: rowData[0] },
-        { width: colWidths.screen, value: rowData[1] },
-        { width: colWidths.startDate, value: rowData[2] },
-        { width: colWidths.endDate, value: rowData[3] },
-        { width: colWidths.duration, value: rowData[4] },
-      ];
-
-      for (const col of cols) {
-        // Draw text (no borders, left-aligned)
-        page.drawText(col.value, {
-          x: xPos,
-          y: yPosition,
-          size: 10,
-          color: rgb(0, 0, 0),
-          font: font,
-        });
-        xPos += col.width + colGap;
-      }
+      });
 
       yPosition -= rowHeight;
 
