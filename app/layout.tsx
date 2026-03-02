@@ -17,3 +17,5 @@ export default function RootLayout({
     </html>
   );
 }
+11:31:23.627 
+Warning: Failed to fetch one or more git submodules
