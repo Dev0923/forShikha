@@ -6,6 +6,8 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 
 
 def parse_datetime(value):
@@ -35,19 +37,55 @@ def generate_rows(media_name, screen_name, start_dt, end_dt, duration_sec, gap_s
 
 
 def build_pdf(output_path, rows):
-    doc = SimpleDocTemplate(str(output_path), pagesize=A4, topMargin=50, leftMargin=36, rightMargin=36)
+    # Try to register Calibri font, fall back to Helvetica if not available
+    try:
+        pdfmetrics.registerFont(TTFont('Calibri', 'calibri.ttf'))
+        pdfmetrics.registerFont(TTFont('Calibri-Bold', 'calibrib.ttf'))
+        font_name = 'Calibri'
+        font_bold = 'Calibri-Bold'
+    except:
+        font_name = 'Helvetica'
+        font_bold = 'Helvetica-Bold'
+    
+    doc = SimpleDocTemplate(str(output_path), pagesize=A4, topMargin=50, leftMargin=20, rightMargin=55)
 
     data = [["Media Name", "Screen Name", "Start Date", "End Date", "Duration  (s)"]] + rows
 
-    table = Table(data, repeatRows=1, colWidths=[135, 95, 145, 145, 60])
+    # Column widths: 135, 85, 110, 110, 40 (total = 480)
+    table = Table(data, repeatRows=1, colWidths=[135, 85, 110, 110, 40], rowHeights=20)
+    
+    # Define gray colors
+    border_color = colors.HexColor('#cfcfcf')
+    header_bg = colors.HexColor('#e6e6e6')
+    
     table.setStyle(TableStyle([
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
-        ("BOX", (0, 0), (-1, 0), 1, colors.black),
-        ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-        ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
-        ("FONTSIZE", (0, 0), (-1, -1), 9),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TEXTCOLOR", (2, 1), (2, -1), colors.black),
+        # Header row styling
+        ('BACKGROUND', (0, 0), (-1, 0), header_bg),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('FONTNAME', (0, 0), (-1, 0), font_bold),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        
+        # Body styling
+        ('FONTNAME', (0, 1), (-1, -1), font_name),
+        ('FONTSIZE', (0, 1), (-1, -1), 9),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        
+        # Alignment: Media Name and Screen Name left, rest center
+        ('ALIGN', (0, 1), (1, -1), 'LEFT'),
+        ('ALIGN', (2, 1), (-1, -1), 'CENTER'),
+        
+        # Vertical alignment
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        
+        # Cell padding (6-8px)
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        
+        # Grid borders (all cells)
+        ('GRID', (0, 0), (-1, -1), 1, border_color),
     ]))
 
     doc.build([table])
