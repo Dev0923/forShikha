@@ -158,7 +158,8 @@ export async function POST(req: NextRequest): Promise<Response> {
           y: yPosition - rowHeight + 6,
           size: 9,
           color: rgb(0, 0, 0),
-          font: bodyFont
+          font: bodyFont,
+        });
         xPos += col.width;
       }
 
