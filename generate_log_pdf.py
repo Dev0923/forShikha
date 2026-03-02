@@ -40,52 +40,37 @@ def build_pdf(output_path, rows):
     # Try to register Calibri font, fall back to Helvetica if not available
     try:
         pdfmetrics.registerFont(TTFont('Calibri', 'calibri.ttf'))
-        pdfmetrics.registerFont(TTFont('Calibri-Bold', 'calibrib.ttf'))
         font_name = 'Calibri'
-        font_bold = 'Calibri-Bold'
     except:
         font_name = 'Helvetica'
-        font_bold = 'Helvetica-Bold'
     
-    doc = SimpleDocTemplate(str(output_path), pagesize=A4, topMargin=50, leftMargin=20, rightMargin=55)
+    doc = SimpleDocTemplate(str(output_path), pagesize=A4, topMargin=50, leftMargin=75, rightMargin=100)
 
     data = [["Media Name", "Screen Name", "Start Date", "End Date", "Duration  (s)"]] + rows
 
-    # Column widths: 135, 85, 110, 110, 40 (total = 480)
-    table = Table(data, repeatRows=1, colWidths=[135, 85, 110, 110, 40], rowHeights=20)
-    
-    # Define gray colors
-    border_color = colors.HexColor('#cfcfcf')
-    header_bg = colors.HexColor('#e6e6e6')
+    # Column widths with gaps: Media(135) + gap(38) + Screen(85) + gap(38) + Start(110) + gap(38) + End(110) + gap(38) + Duration(40)
+    table = Table(data, repeatRows=1, colWidths=[135, 85, 110, 110, 40], rowHeights=19, spaceBefore=10)
     
     table.setStyle(TableStyle([
-        # Header row styling
-        ('BACKGROUND', (0, 0), (-1, 0), header_bg),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-        ('FONTNAME', (0, 0), (-1, 0), font_bold),
-        ('FONTSIZE', (0, 0), (-1, 0), 9),
-        ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+        # Font styling - Regular (not bold) for all including header
+        ('FONTNAME', (0, 0), (-1, -1), font_name),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
         
-        # Body styling
-        ('FONTNAME', (0, 1), (-1, -1), font_name),
-        ('FONTSIZE', (0, 1), (-1, -1), 9),
-        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-        
-        # Alignment: Media Name and Screen Name left, rest center
-        ('ALIGN', (0, 1), (1, -1), 'LEFT'),
-        ('ALIGN', (2, 1), (-1, -1), 'CENTER'),
+        # All columns left-aligned
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         
         # Vertical alignment
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
         
-        # Cell padding (6-8px)
-        ('LEFTPADDING', (0, 0), (-1, -1), 6),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
-        ('TOPPADDING', (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+        # Cell padding - minimal for borderless look
+        ('LEFTPADDING', (0, 0), (-1, -1), 0),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 38),  # Gap between columns
+        ('TOPPADDING', (0, 0), (-1, -1), 2),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
         
-        # Grid borders (all cells)
-        ('GRID', (0, 0), (-1, -1), 1, border_color),
+        # NO borders - borderless table
+        ('LINEBELOW', (0, 0), (-1, 0), 0, colors.white),  # No header underline
     ]))
 
     doc.build([table])

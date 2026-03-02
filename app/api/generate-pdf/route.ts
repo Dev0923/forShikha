@@ -42,62 +42,43 @@ export async function POST(req: NextRequest): Promise<Response> {
 
     // Create PDF
     const pdfDoc = await PDFDocument.create();
-    const headerFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    const bodyFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     let page = pdfDoc.addPage([595, 842]); // A4 size
     const { width, height } = page.getSize();
 
-    const leftMargin = 20;
-    const rightMargin = 55;
+    const leftMargin = 75;
+    const rightMargin = 100;
     const colWidths = { media: 135, screen: 85, startDate: 110, endDate: 110, duration: 40 };
-    const rowHeight = 20;
-    const cellPaddingLeft = 6;
-    const cellPaddingTop = 4;
-    
-    // Define colors
-    const borderColor = rgb(0.81, 0.81, 0.81); // #cfcfcf
-    const headerBgColor = rgb(0.90, 0.90, 0.90); // #e6e6e6
+    const colGap = 38; // Gap between columns
+    const rowHeight = 19;
+    const lineHeight = 1.4;
 
     let yPosition = height - leftMargin - 30;
 
-    // Draw column headers
+    // Draw column headers (regular font, no bold, no background)
     const headerColumnNames = ['Media Name', 'Screen Name', 'Start Date', 'End Date', 'Duration  (s)'];
     const headerColumns = [
-      { width: colWidths.media, name: headerColumnNames[0], align: 'center' },
-      { width: colWidths.screen, name: headerColumnNames[1], align: 'center' },
-      { width: colWidths.startDate, name: headerColumnNames[2], align: 'center' },
-      { width: colWidths.endDate, name: headerColumnNames[3], align: 'center' },
-      { width: colWidths.duration, name: headerColumnNames[4], align: 'center' },
+      { width: colWidths.media, name: headerColumnNames[0] },
+      { width: colWidths.screen, name: headerColumnNames[1] },
+      { width: colWidths.startDate, name: headerColumnNames[2] },
+      { width: colWidths.endDate, name: headerColumnNames[3] },
+      { width: colWidths.duration, name: headerColumnNames[4] },
     ];
 
     let xPos = leftMargin;
     for (const col of headerColumns) {
-      // Draw header cell background
-      page.drawRectangle({
-        x: xPos,
-        y: yPosition - rowHeight,
-        width: col.width,
-        height: rowHeight,
-        color: headerBgColor,
-        borderColor: borderColor,
-        borderWidth: 1,
-      });
-      
-      // Calculate text position for center alignment
-      const textWidth = headerFont.widthOfTextAtSize(col.name, 9);
-      const textX = xPos + (col.width - textWidth) / 2;
-      
+      // Draw header text (left-aligned, no background, no borders)
       page.drawText(col.name, {
-        x: textX,
-        y: yPosition - rowHeight + 6,
-        size: 9,
+        x: xPos,
+        y: yPosition,
+        size: 10,
         color: rgb(0, 0, 0),
-        font: headerFont,
+        font: font,
       });
-      xPos += col.width;
+      xPos += col.width + colGap;
     }
 
-    yPosition -= rowHeight;
+    yPosition -= rowHeight + 5;
 
     // Generate rows
     const durationNum = parseInt(duration);
@@ -115,7 +96,7 @@ export async function POST(req: NextRequest): Promise<Response> {
         yPosition = height - leftMargin - 30;
       }
 
-      // Draw row cells
+      // Draw row cells (borderless, left-aligned)
       const rowData = [
         mediaName,
         screenName,
@@ -126,41 +107,23 @@ export async function POST(req: NextRequest): Promise<Response> {
 
       xPos = leftMargin;
       const cols = [
-        { width: colWidths.media, value: rowData[0], align: 'left' },
-        { width: colWidths.screen, value: rowData[1], align: 'left' },
-        { width: colWidths.startDate, value: rowData[2], align: 'center' },
-        { width: colWidths.endDate, value: rowData[3], align: 'center' },
-        { width: colWidths.duration, value: rowData[4], align: 'center' },
+        { width: colWidths.media, value: rowData[0] },
+        { width: colWidths.screen, value: rowData[1] },
+        { width: colWidths.startDate, value: rowData[2] },
+        { width: colWidths.endDate, value: rowData[3] },
+        { width: colWidths.duration, value: rowData[4] },
       ];
 
       for (const col of cols) {
-        // Draw cell border
-        page.drawRectangle({
-          x: xPos,
-          y: yPosition - rowHeight,
-          width: col.width,
-          height: rowHeight,
-          borderColor: borderColor,
-          borderWidth: 1,
-        });
-        
-        // Calculate text position based on alignment
-        let textX;
-        if (col.align === 'center') {
-          const textWidth = bodyFont.widthOfTextAtSize(col.value, 9);
-          textX = xPos + (col.width - textWidth) / 2;
-        } else {
-          textX = xPos + cellPaddingLeft;
-        }
-        
+        // Draw text (no borders, left-aligned)
         page.drawText(col.value, {
-          x: textX,
-          y: yPosition - rowHeight + 6,
-          size: 9,
+          x: xPos,
+          y: yPosition,
+          size: 10,
           color: rgb(0, 0, 0),
-          font: bodyFont,
+          font: font,
         });
-        xPos += col.width;
+        xPos += col.width + colGap;
       }
 
       yPosition -= rowHeight;
