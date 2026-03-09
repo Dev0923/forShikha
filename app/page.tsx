@@ -347,7 +347,7 @@ export default function Home() {
                   required
                 />
                 <p style={{ fontSize: '12px', color: '#666', marginTop: '5px' }}>
-                  Note: Start time (11:00-11:10), end time (22:50-23:00), and gap (190-200s) will be randomized for each day
+                  Note: Start time (11:00-11:10), end time (22:50-23:00) will be randomized for each day. Gap is fixed at 110s
                 </p>
               </div>
             </>
