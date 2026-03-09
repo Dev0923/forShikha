@@ -63,7 +63,7 @@ function generateRandomEndTime(date: Date): Date {
 }
 
 function generateRandomGap(): number {
-  return randomBetween(190, 200);
+  return 110;
 }
 
 async function generateDayPDF(
